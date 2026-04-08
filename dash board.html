@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard de Vendas</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f0eeea;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.14);
+    --text: #1a1916;
+    --text2: #6b6860;
+    --text3: #a09e99;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--city-color, #3b82f6);
+    transition: background 0.3s;
+  }
+
+  .brand h1 {
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+
+  .brand p {
+    font-size: 12px;
+    color: var(--text3);
+    font-family: var(--mono);
+    margin-top: 2px;
+  }
+
+  .updated {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--mono);
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    padding: 7px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--sans);
+    border-radius: 999px;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: -0.01em;
+  }
+
+  .tab:hover { background: var(--surface2); }
+
+  .tab.active {
+    background: var(--city-color, #3b82f6);
+    color: #fff;
+    border-color: transparent;
+  }
+
+  /* Metrics grid */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .metric.highlight::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--city-color, #3b82f6);
+    opacity: 0.04;
+    pointer-events: none;
+  }
+
+  .metric-label {
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+  }
+
+  .metric-value {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .metric.highlight .metric-value {
+    color: var(--city-color, #3b82f6);
+  }
+
+  .metric-sub {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--mono);
+    margin-top: 5px;
+  }
+
+  /* Section */
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .section-count {
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--text3);
+  }
+
+  /* Agent cards */
+  .agent-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 8px;
+    transition: border-color 0.2s;
+  }
+
+  .agent-card:hover { border-color: var(--border2); }
+
+  .agent-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+
+  .agent-left { display: flex; align-items: center; gap: 10px; }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+    background: var(--city-color, #3b82f6);
+    color: #fff;
+    opacity: 0.85;
+  }
+
+  .agent-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    text-transform: capitalize;
+    letter-spacing: -0.01em;
+  }
+
+  .agent-vendas {
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--text3);
+    margin-top: 1px;
+  }
+
+  .badge {
+    font-size: 11px;
+    font-family: var(--mono);
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--surface2);
+    color: var(--text2);
+    white-space: nowrap;
+  }
+
+  .agent-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    font-family: var(--mono);
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 3px;
+  }
+
+  .stat-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    font-family: var(--mono);
+    letter-spacing: -0.02em;
+  }
+
+  .stat-value.accent { color: var(--city-color, #3b82f6); }
+
+  .progress-wrap {
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 3px;
+    border-radius: 999px;
+    background: var(--city-color, #3b82f6);
+    opacity: 0.6;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .footer-note {
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--text3);
+  }
+
+  .imposto-badge {
+    font-size: 11px;
+    font-family: var(--mono);
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+  }
+
+  @media (max-width: 560px) {
+    .metrics { grid-template-columns: 1fr 1fr; }
+    .metric:last-child { grid-column: 1 / -1; }
+    .agent-stats { grid-template-columns: repeat(3, 1fr); }
+    .metric-value { font-size: 16px; }
+  }
+
+  @media (max-width: 380px) {
+    .agent-stats { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="top">
+    <div class="brand">
+      <div class="brand-dot" id="brandDot"></div>
+      <div>
+        <h1>Dashboard de Vendas</h1>
+        <p id="brandSub">carregando...</p>
+      </div>
+    </div>
+    <span class="updated" id="dateLabel"></span>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="metrics" id="metrics"></div>
+
+  <div class="section-head">
+    <span class="section-title">Agentes</span>
+    <span class="section-count" id="agentCount"></span>
+  </div>
+  <div id="agents"></div>
+
+  <div class="footer">
+    <span class="footer-note">Valores calculados automaticamente</span>
+    <span class="imposto-badge">Imposto: 12,15%</span>
+  </div>
+
+</div>
+
+<script>
+const db = {
+  configuracoes: { imposto_meta: 0.1215, moeda: "BRL" },
+  cidades: [
+    {
+      id: 1, nome: "Campinas", cor_tema: "#3b82f6", saldo_meta: 400.00,
+      agentes: [
+        { nome: "mendes", vendas: 123111, valor_venda: 65.00 },
+        { nome: "hnasjikh...", vendas: 10, valor_venda: 65.00 },
+        { nome: "thales", vendas: 7, valor_venda: 65.00 }
+      ]
+    },
+    {
+      id: 2, nome: "Belo Horizonte", cor_tema: "#10b981", saldo_meta: 0.00,
+      agentes: [
+        { nome: "mendes", vendas: 4, valor_venda: 65.00 },
+        { nome: "helo", vendas: 10, valor_venda: 65.00 },
+        { nome: "zenildo", vendas: 7, valor_venda: 65.00 }
+      ]
+    }
+  ]
+};
+
+let cidadeAtual = db.cidades[0];
+
+function brl(n) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n);
+}
+function num(n) {
+  return new Intl.NumberFormat('pt-BR').format(n);
+}
+function initials(name) {
+  return name.replace(/[^a-zA-Z\s]/g, '').trim().slice(0, 2).toUpperCase() || '??';
+}
+function calcular(cidade) {
+  let totalLiquido = 0;
+  let totalVendas = 0;
+  cidade.agentes.forEach(a => {
+    totalLiquido += a.vendas * a.valor_venda;
+    totalVendas += a.vendas;
+  });
+  const imposto = totalLiquido * db.configuracoes.imposto_meta;
+  const totalPix = totalLiquido + imposto;
+  return { totalLiquido, imposto, totalPix, totalVendas };
+}
+
+function setCor(cor) {
+  document.documentElement.style.setProperty('--city-color', cor);
+}
+
+function renderTabs() {
+  document.getElementById('tabs').innerHTML = db.cidades.map(c => `
+    <button class="tab ${c.id === cidadeAtual.id ? 'active' : ''}" onclick="selecionar(${c.id})">${c.nome}</button>
+  `).join('');
+}
+
+function renderMetrics() {
+  const r = calcular(cidadeAtual);
+  document.getElementById('brandDot').style.background = cidadeAtual.cor_tema;
+  document.getElementById('brandSub').textContent = cidadeAtual.nome + ' · ' + cidadeAtual.agentes.length + ' agentes';
+  document.getElementById('metrics').innerHTML = `
+    <div class="metric">
+      <div class="metric-label">Total Líquido</div>
+      <div class="metric-value">${brl(r.totalLiquido)}</div>
+      <div class="metric-sub">${num(r.totalVendas)} vendas · R$ ${(65).toFixed(2)}/un</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Imposto</div>
+      <div class="metric-value">${brl(r.imposto)}</div>
+      <div class="metric-sub">12,15% sobre o líquido</div>
+    </div>
+    <div class="metric highlight">
+      <div class="metric-label">Total PIX</div>
+      <div class="metric-value">${brl(r.totalPix)}</div>
+      <div class="metric-sub">líquido + imposto</div>
+    </div>
+  `;
+}
+
+function renderAgents() {
+  const max = Math.max(...cidadeAtual.agentes.map(a => a.vendas), 1);
+  document.getElementById('agentCount').textContent = cidadeAtual.agentes.length + ' registros';
+  document.getElementById('agents').innerHTML = cidadeAtual.agentes.map(a => {
+    const liq = a.vendas * a.valor_venda;
+    const imp = liq * db.configuracoes.imposto_meta;
+    const pix = liq + imp;
+    const pct = Math.round((a.vendas / max) * 100);
+    return `
+      <div class="agent-card">
+        <div class="agent-top">
+          <div class="agent-left">
+            <div class="avatar">${initials(a.nome)}</div>
+            <div>
+              <div class="agent-name">${a.nome}</div>
+              <div class="agent-vendas">${num(a.vendas)} vendas</div>
+            </div>
+          </div>
+          <span class="badge">${pct}% do máx.</span>
+        </div>
+        <div class="agent-stats">
+          <div>
+            <div class="stat-label">Líquido</div>
+            <div class="stat-value">${brl(liq)}</div>
+          </div>
+          <div>
+            <div class="stat-label">Imposto</div>
+            <div class="stat-value">${brl(imp)}</div>
+          </div>
+          <div>
+            <div class="stat-label">PIX</div>
+            <div class="stat-value accent">${brl(pix)}</div>
+          </div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar" style="width:${pct}%"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function selecionar(id) {
+  cidadeAtual = db.cidades.find(c => c.id === id);
+  setCor(cidadeAtual.cor_tema);
+  renderTabs();
+  renderMetrics();
+  renderAgents();
+}
+
+function renderDate() {
+  const d = new Date();
+  document.getElementById('dateLabel').textContent =
+    d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+setCor(cidadeAtual.cor_tema);
+renderDate();
+renderTabs();
+renderMetrics();
+renderAgents();
+</script>
+</body>
+</html>
